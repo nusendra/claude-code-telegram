@@ -5,11 +5,11 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=YOUR_USERNAME
-ExecStart=/home/YOUR_USERNAME/claude-telegram
+User=nusendra
+ExecStart=/home/nusendra/claude-telegram
 Restart=on-failure
 RestartSec=5
-EnvironmentFile=/home/YOUR_USERNAME/.config/claude-telegram/.env
+EnvironmentFile=/home/nusendra/.config/claude-telegram/.env
 
 [Install]
 WantedBy=multi-user.target
