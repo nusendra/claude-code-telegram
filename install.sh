@@ -45,7 +45,7 @@ mkdir -p "$CONFIG_DIR"
 if [ -f "$CONFIG_FILE" ]; then
     warn "Config already exists at $CONFIG_FILE"
     ask "Overwrite it? [y/N]"
-    read -r OVERWRITE
+    read -r OVERWRITE </dev/tty
     if [[ ! "$OVERWRITE" =~ ^[Yy]$ ]]; then
         info "Keeping existing config."
         SKIP_CONFIG=true
@@ -60,26 +60,26 @@ if [ -z "$SKIP_CONFIG" ]; then
     echo ""
 
     ask "Telegram bot token:"
-    read -r BOT_TOKEN
+    read -r BOT_TOKEN </dev/tty
     [ -z "$BOT_TOKEN" ] && error "Bot token cannot be empty."
 
     ask "Your Telegram user ID (numbers only):"
-    read -r USER_ID
+    read -r USER_ID </dev/tty
     [[ "$USER_ID" =~ ^[0-9]+$ ]] || error "User ID must be a number."
 
     CLAUDE_DEFAULT=$(command -v claude 2>/dev/null || echo "")
     ask "Full path to claude binary [${CLAUDE_DEFAULT:-not found, enter manually}]:"
-    read -r CLAUDE_BIN
+    read -r CLAUDE_BIN </dev/tty
     CLAUDE_BIN="${CLAUDE_BIN:-$CLAUDE_DEFAULT}"
     [ -z "$CLAUDE_BIN" ] && error "claude binary path cannot be empty. Run 'which claude' to find it."
     [ -x "$CLAUDE_BIN" ] || warn "'$CLAUDE_BIN' does not exist or is not executable. Make sure it's correct."
 
     ask "Working directory for Claude [default: $HOME]:"
-    read -r WORKING_DIR
+    read -r WORKING_DIR </dev/tty
     WORKING_DIR="${WORKING_DIR:-$HOME}"
 
     ask "Claude timeout in seconds [default: 300]:"
-    read -r TIMEOUT
+    read -r TIMEOUT </dev/tty
     TIMEOUT="${TIMEOUT:-300}"
 
     cat > "$CONFIG_FILE" <<EOF
