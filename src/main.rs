@@ -75,7 +75,6 @@ async fn main() -> anyhow::Result<()> {
 
     Dispatcher::builder(bot, handler)
         .dependencies(dptree::deps![state, config])
-        .enable_ctrlc_handler()
         .build()
         .dispatch()
         .await;
