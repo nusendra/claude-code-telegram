@@ -80,8 +80,11 @@ journalctl -u claude-telegram -f
 |---|---|
 | `/start` or `/help` | Show available commands |
 | `/new` | Clear the current session — Claude starts fresh with no memory of previous messages |
-| `/status` | Show the current session ID and working directory |
+| `/status` | Show the current session ID, working directory, and active model |
 | `/cd <path>` | Change the working directory. Accepts absolute or relative paths |
+| `/model` | Show the current model |
+| `/model <name>` | Switch model (e.g. `opus`, `sonnet`, `haiku`, or a full model ID like `claude-opus-4-7`) |
+| `/model default` | Clear the model override and use the Claude CLI default |
 
 ### Example session
 
@@ -105,10 +108,18 @@ Bot:   Session cleared. Starting fresh.
 
 ## Updating
 
-Re-run the installer — it downloads the latest binary and restarts the service. Your config is preserved.
+Download and run the update script — it fetches the latest release and restarts the service. Your config is preserved.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/nusendra/claude-code-telegram/main/install.sh | bash
+wget https://raw.githubusercontent.com/nusendra/claude-code-telegram/main/update.sh -O ~/update-claude-telegram.sh
+chmod +x ~/update-claude-telegram.sh
+~/update-claude-telegram.sh
+```
+
+After that, future updates are just:
+
+```bash
+~/update-claude-telegram.sh
 ```
 
 ---
@@ -222,13 +233,14 @@ Telegram (long-polling)
     ▼
 teloxide dispatcher
     │
-    ├── /new, /status, /cd, /help  ← command handlers
+    ├── /new, /status, /cd, /model, /help  ← command handlers
     │
     └── plain text  ──────────────► tokio::process::Command
                                          │
                                          │  claude -p "..." --output-format json
                                          │  --dangerously-skip-permissions
                                          │  [--resume <session_id>]
+                                         │  [--model <model>]
                                          │
                                          ▼
                                     parse JSON output
