@@ -12,7 +12,7 @@ echo "Stopping service..."
 sudo systemctl stop claude-telegram
 
 echo "Downloading..."
-TMPFILE=$(mktemp)
+TMPFILE="/tmp/claude-telegram-new"
 sudo wget -q "https://github.com/$REPO/releases/download/$LATEST/claude-telegram-aarch64" -O "$TMPFILE"
 sudo chmod +x "$TMPFILE"
 sudo mv "$TMPFILE" "$INSTALL_PATH"
