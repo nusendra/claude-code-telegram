@@ -12,8 +12,10 @@ echo "Stopping service..."
 sudo systemctl stop claude-telegram
 
 echo "Downloading..."
-sudo wget -q "https://github.com/$REPO/releases/download/$LATEST/claude-telegram-aarch64" -O "$INSTALL_PATH"
-sudo chmod +x "$INSTALL_PATH"
+TMPFILE=$(mktemp)
+sudo wget -q "https://github.com/$REPO/releases/download/$LATEST/claude-telegram-aarch64" -O "$TMPFILE"
+sudo chmod +x "$TMPFILE"
+sudo mv "$TMPFILE" "$INSTALL_PATH"
 
 echo "Restarting service..."
 sudo systemctl restart claude-telegram
