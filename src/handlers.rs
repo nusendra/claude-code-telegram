@@ -19,6 +19,7 @@ pub async fn cmd_help(bot: Bot, msg: Message) -> ResponseResult<()> {
          /new — clear session (fresh conversation)\n\
          /status — show session ID and working dir\n\
          /cd <path> — change working directory\n\
+         /model [name] — show or change model (e.g. opus, sonnet, haiku, default)\n\
          /help — show this message",
     )
     .await?;
@@ -44,8 +45,52 @@ pub async fn cmd_status(
     let s = state.lock().await;
     let session = s.session_id.as_deref().unwrap_or("none");
     let dir = s.working_dir.display();
-    bot.send_message(msg.chat.id, format!("Session: {session}\nDir: {dir}"))
+    let model = s.model.as_deref().unwrap_or("default");
+    bot.send_message(
+        msg.chat.id,
+        format!("Session: {session}\nDir: {dir}\nModel: {model}"),
+    )
+    .await?;
+    Ok(())
+}
+
+pub async fn cmd_model(
+    bot: Bot,
+    msg: Message,
+    state: Arc<Mutex<BotState>>,
+    arg: String,
+) -> ResponseResult<()> {
+    let arg = arg.trim().to_string();
+    if arg.is_empty() {
+        let current = state
+            .lock()
+            .await
+            .model
+            .clone()
+            .unwrap_or_else(|| "default".to_string());
+        bot.send_message(
+            msg.chat.id,
+            format!(
+                "Current model: {current}\n\nUsage: /model <name>\n\
+                 Examples: opus, sonnet, haiku, default\n\
+                 Or a full model ID (e.g. claude-opus-4-7).\n\
+                 Use 'default' to clear the override."
+            ),
+        )
         .await?;
+        return Ok(());
+    }
+
+    let new_model = if arg.eq_ignore_ascii_case("default") || arg.eq_ignore_ascii_case("clear") {
+        None
+    } else {
+        Some(arg.clone())
+    };
+
+    state.lock().await.model = new_model.clone();
+    info!("Model → {:?}", new_model);
+    let label = new_model.as_deref().unwrap_or("default");
+    bot.send_message(msg.chat.id, format!("Model: {label}")).await?;
     Ok(())
 }
 
@@ -93,9 +138,9 @@ pub async fn on_message(
         None => return Ok(()),
     };
 
-    let (session_id, working_dir) = {
+    let (session_id, working_dir, model) = {
         let s = state.lock().await;
-        (s.session_id.clone(), s.working_dir.clone())
+        (s.session_id.clone(), s.working_dir.clone(), s.model.clone())
     };
 
     info!(session = ?session_id, "Forwarding message to Claude");
@@ -116,6 +161,7 @@ pub async fn on_message(
         &working_dir,
         &config.claude_bin,
         config.claude_timeout,
+        model.as_deref(),
     )
     .await;
 

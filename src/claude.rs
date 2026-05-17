@@ -29,6 +29,7 @@ pub async fn run(
     working_dir: &PathBuf,
     claude_bin: &str,
     timeout_secs: u64,
+    model: Option<&str>,
 ) -> Result<ClaudeOutput> {
     let mut cmd = Command::new(claude_bin);
     cmd.arg("-p")
@@ -42,6 +43,10 @@ pub async fn run(
 
     if let Some(sid) = session_id {
         cmd.arg("--resume").arg(sid);
+    }
+
+    if let Some(m) = model {
+        cmd.arg("--model").arg(m);
     }
 
     let child = cmd.spawn()?;

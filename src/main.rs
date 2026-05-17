@@ -26,6 +26,8 @@ enum Cmd {
     Status,
     #[command(description = "Change working directory")]
     Cd(String),
+    #[command(description = "Show or change model (opus/sonnet/haiku/default)")]
+    Model(String),
 }
 
 #[tokio::main]
@@ -67,6 +69,7 @@ async fn main() -> anyhow::Result<()> {
                             Cmd::New => cmd_new(bot, msg, state).await,
                             Cmd::Status => cmd_status(bot, msg, state).await,
                             Cmd::Cd(arg) => cmd_cd(bot, msg, state, arg).await,
+                            Cmd::Model(arg) => cmd_model(bot, msg, state, arg).await,
                         }
                     },
                 ),
